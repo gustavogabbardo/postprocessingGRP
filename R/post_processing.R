@@ -1,10 +1,9 @@
-#' Post-processing Model Application
-#'
-#' This function applies the post-processing model (MLP, Random Forest, or XGBoost) to the pre-processed GR5H_RI forecast data.
+#' Post-processing Model Application (MLP, Random Forest, or XGBoost)
 #'
 #' @param input_data_cal A tibble containing the pre-processed GR5H_RI forecast data for the calibration period.
 #' @param input_data_eval A tibble containing the pre-processed GR5H_RI forecast data for the evaluation period.
 #' @param model_name A string indicating the type of post-processing model to apply ("mlp", "random_forest" or "xgboost").
+#' @param Hprev Forecast horizon ("H3", "H6", "H12", "H24").
 #' 
 #' @return A list containing:
 #'   - `cal`: The model's predictions for the calibration period.
@@ -13,7 +12,12 @@
 #'
 #' @export
 
-post_processing <- function(input_data_cal, input_data_eval, model_name) {
+post_processing <- function(
+  input_data_cal, input_data_eval, model_name, Hprev
+) {
+  
+  #! Forecast horizon in hours
+  Hprev_hours <- as.integer(substr(Hprev, 2, nchar(Hprev)))
 
   #! Split data (training, validation and testing)
   #! Initial split

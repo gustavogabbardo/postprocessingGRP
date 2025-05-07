@@ -1,18 +1,24 @@
-#' Evaluate model performance for each sub-period
-#'
-#' This function evaluates the performance of GR5H_RI model and the post-processing model results over different 
-#' based on various performance metrics, such as Nash-Sutcliffe Efficiency coefficient and a contingency table for flood events.
+#' Evaluate model performance (NSE, KGE, C2MP, POD, FAR, CSI)
 #'
 #' @param results_cal A tibble containing the model results in calibration mode.
 #' @param results_test A tibble containing the model results in evaluation mode.
 #' @param events A tibble containing information about the flow events: start, end dates, and event IDs
-#' @param Qprob_thr_P1_P2 Streamflow threshold to evaluate contingency table
+#' @param Qthr Streamflow threshold to evaluate contingency table
+#' @param Hprev Forecast horizon ("H3", "H6", "H12", "H24").
 #' @return A tibble containing the calculated performance metrics for the specified period, including:
-#'   - `NSE_KGE bounded`: NSE and KGE metrics for overall performance and events.
+#'   - `NSE_KGE bounded`: NSE and KGE metrics for overall performance and flood events.
+#'   - `C2MP`: C2MP metrics for overall performance and flood events.
 #'   - `cont_table`: Contingency table metrics - POD, FAR, CSI, for each model variable, Qprev, Qcorr, Qtan
 #' @export
 
-eval_results <- function(results_cal, results_test, events, Qprob_thr_P1_P2) {
+evaluate_results <- function(
+  results_cal, results_test, events, Qthr, Hprev) {
+  
+  #! Forecast horizon in hours
+  Hprev_hours <- as.integer(substr(Hprev, 2, nchar(Hprev)))
+
+  #! Forecast horizon in date-time format
+  Hprev_datetime <- lubridate::hours(Hprev_hours) 
 
   #! Persistance (Qobs_tmH)
   results_cal <- results_cal |> 
@@ -229,7 +235,7 @@ eval_results <- function(results_cal, results_test, events, Qprob_thr_P1_P2) {
   ct_Qprev_cal <- evalhyd::evald(
     q_obs = array(Qobs), 
     q_prd = array(Qprev_cal), 
-    q_thr = Qprob_thr_P1_P2,
+    q_thr = Qthr,
     events = "high",
     metrics = c("CONT_TBL")
   )
@@ -240,7 +246,7 @@ eval_results <- function(results_cal, results_test, events, Qprob_thr_P1_P2) {
   ct_Qprev_test <- evalhyd::evald(
     q_obs = array(Qobs), 
     q_prd = array(Qprev_test), 
-    q_thr = Qprob_thr_P1_P2,
+    q_thr = Qthr,
     events = "high",
     metrics = c("CONT_TBL")
   )
@@ -252,7 +258,7 @@ eval_results <- function(results_cal, results_test, events, Qprob_thr_P1_P2) {
   ct_Qcorr_cal <- evalhyd::evald(
     q_obs = array(Qobs), 
     q_prd = array(Qcorr_cal), 
-    q_thr = Qprob_thr_P1_P2,
+    q_thr = Qthr,
     events = "high",
     metrics = c("CONT_TBL")
   )
@@ -263,7 +269,7 @@ eval_results <- function(results_cal, results_test, events, Qprob_thr_P1_P2) {
   ct_Qcorr_test <- evalhyd::evald(
     q_obs = array(Qobs), 
     q_prd = array(Qcorr_test), 
-    q_thr = Qprob_thr_P1_P2,
+    q_thr = Qthr,
     events = "high",
     metrics = c("CONT_TBL")
   )
@@ -275,7 +281,7 @@ eval_results <- function(results_cal, results_test, events, Qprob_thr_P1_P2) {
   ct_Qtan_cal <- evalhyd::evald(
     q_obs = array(Qobs), 
     q_prd = array(Qtan_cal), 
-    q_thr = Qprob_thr_P1_P2,
+    q_thr = Qthr,
     events = "high",
     metrics = c("CONT_TBL")
   )
@@ -286,7 +292,7 @@ eval_results <- function(results_cal, results_test, events, Qprob_thr_P1_P2) {
   ct_Qtan_test <- evalhyd::evald(
     q_obs = array(Qobs), 
     q_prd = array(Qtan_test), 
-    q_thr = Qprob_thr_P1_P2,
+    q_thr = Qthr,
     events = "high",
     metrics = c("CONT_TBL")
   )

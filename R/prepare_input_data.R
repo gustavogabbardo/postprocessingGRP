@@ -5,7 +5,7 @@
 #' @param Hprev Forecast horizon ("H3", "H6", "H12", "H24").
 #' @param Qobs_ts Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl).
 #'
-#' @return A tibble containing processed data for use in the post-processing model, including time series 
+#' @return A tibble containing pre-processed data for use in the post-processing model, including time series 
 #' of observed and forecasted streamflow.
 #' @export
 
