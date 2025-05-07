@@ -1,28 +1,26 @@
 #' Prepare Input Data for Post-Processing Model
-#'
-#' This function prepares input data from GR5H_RI forecasts and observed data for use in a post-processing model.
 #' 
-#' The following variables must be defined before using this function:
-#' - Qobs_ts: Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl).
-#' - Pmm: Precipitation time series tibble with columns "Date" (ddtm) and "Pmm" (dbl).
-#' - time_steps: time window, in hours, used to compute past streamflow prediction errors for the post-processing model.
-#' - Hcal: calibration horizon ("H3", "H6", "H12", "H24")
-#' - Hprev: forecast horizon ("H3", "H6", "H12", "H24")
-#' 
-#' @param path_prev Path to the GR5H_RI forecast data.
+#' @param path_prev Path to the GR5H_RI forecast data (RDS file).
 #' @param time_steps Time window, in hours, used to compute past streamflow prediction errors for the post-processing model.
+#' @param Hprev Forecast horizon ("H3", "H6", "H12", "H24").
+#' @param Qobs_ts Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl).
 #'
-#' @return A list containing:
-#'   - `prev`: A prepared dataset, containing processed data for use in the post-processing model, including time series 
-#'     of observed and forecasted streamflow, accumulated precipitation and predicted streaflow errors.
-#'   - `Qprob_thr`: The streamflow threshold that will be used for flood event identification in the contingency table.
-#'
+#' @return A tibble containing processed data for use in the post-processing model, including time series 
+#' of observed and forecasted streamflow.
 #' @export
 
-prepare_input_data <- function(path_prev, time_steps) {
+prepare_input_data <- function(
+  path_prev, time_steps, Hprev, Qobs_ts
+) {
   
   #! Number of lags calculated from the error at time t predicted at time t-1 (Err_t_t-1)
   n_lags <- time_steps - 1
+
+  #! Forecast horizon in hours
+  Hprev_hours <- as.integer(substr(Hprev, 2, nchar(Hprev)))
+
+  #! Forecast horizon in date-time format
+  Hprev_datetime <- lubridate::hours(Hprev_hours) 
 
   #! Read forecasts into a list and then convert to a tibble
   prev <- readr::read_rds(path_prev) 
@@ -33,8 +31,7 @@ prepare_input_data <- function(path_prev, time_steps) {
   #! Join observation data (Qobs and Pmm) with GR5H_RI model predictions
   prev <- prev |> 
     dplyr::select(Date, H1, tidyr::all_of(Hprev)) |> 
-    dplyr::left_join(Qobs_ts, dplyr::join_by(Date)) |> 
-    dplyr::left_join(Pmm_ts, dplyr::join_by(Date))
+    dplyr::left_join(Qobs_ts, dplyr::join_by(Date))
   
   #! Exclude data from October, November, and December 2021 (issues with Comephore data)
   prev <- prev |> 
@@ -47,7 +44,7 @@ prepare_input_data <- function(path_prev, time_steps) {
     dplyr::rename(Qobs_t = Qobs)
   
   #! Calculate streamflow threshold (to evaluate contingency table) 
-  Qprob_thr <- stats::quantile(
+  Qthr <- stats::quantile(
     prev |> 
       dplyr::pull(Qobs_t), 
       probs = prob_thr,
@@ -109,8 +106,5 @@ prepare_input_data <- function(path_prev, time_steps) {
   prev <- prev |>
     tidyr::drop_na()
 
-  return(list(
-    prev,
-    Qprob_thr
-  ))
+  return(prev)
 }
