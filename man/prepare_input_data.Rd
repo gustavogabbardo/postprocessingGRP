@@ -4,16 +4,18 @@
 \alias{prepare_input_data}
 \title{Prepare Input Data for Post-Processing Model}
 \usage{
-prepare_input_data(path_prev, time_steps, Hprev, Qobs_ts)
+prepare_input_data(path_prev, time_steps, Hprev, Qobs_ts, cal_method)
 }
 \arguments{
-\item{path_prev}{Path to the GR5H_RI forecast data (RDS file).}
+\item{path_prev}{Path to the GR5H_RI forecast data (RDS file)}
 
-\item{time_steps}{Time window, in hours, used to compute past streamflow prediction errors for the post-processing model.}
+\item{time_steps}{Time window (in hours) used to compute past streamflow prediction errors for the post-processing model}
 
-\item{Hprev}{Forecast horizon ("H3", "H6", "H12", "H24").}
+\item{Hprev}{Forecast horizon ("H3", "H6", "H12" or "H24")}
 
-\item{Qobs_ts}{Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl).}
+\item{Qobs_ts}{Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl)}
+
+\item{cal_method}{Calibration method ("WsRf, "Ref" or "OL")}
 }
 \value{
 A tibble containing pre-processed data for use in the post-processing model, including time series

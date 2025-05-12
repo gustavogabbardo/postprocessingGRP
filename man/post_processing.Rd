@@ -7,20 +7,20 @@
 post_processing(input_data_cal, input_data_eval, model_name, Hprev)
 }
 \arguments{
-\item{input_data_cal}{A tibble containing the pre-processed GR5H_RI forecast data for the calibration period.}
+\item{input_data_cal}{A tibble containing the pre-processed GR5H_RI forecast data for the calibration period}
 
-\item{input_data_eval}{A tibble containing the pre-processed GR5H_RI forecast data for the evaluation period.}
+\item{input_data_eval}{A tibble containing the pre-processed GR5H_RI forecast data for the evaluation period}
 
-\item{model_name}{A string indicating the type of post-processing model to apply ("mlp", "random_forest" or "xgboost").}
+\item{model_name}{A string indicating the type of post-processing model to apply ("mlp", "random_forest" or "xgboost")}
 
-\item{Hprev}{Forecast horizon ("H3", "H6", "H12", "H24").}
+\item{Hprev}{Forecast horizon ("H3", "H6", "H12" or "H24")}
 }
 \value{
 A list containing:
 \itemize{
-\item \code{cal}: The model's predictions for the calibration period.
-\item \code{test}: The model's predictions for the evaluation period.
-\item \code{model}: Fitted model and calibrated hyperparameters.
+\item \code{cal}: The model's predictions for the calibration period
+\item \code{test}: The model's predictions for the evaluation period
+\item \code{model}: Fitted model and calibrated hyperparameters
 }
 }
 \description{

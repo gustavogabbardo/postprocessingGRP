@@ -7,22 +7,22 @@
 evaluate_results(results_cal, results_test, events, Qthr, Hprev)
 }
 \arguments{
-\item{results_cal}{A tibble containing the model results in calibration mode.}
+\item{results_cal}{A tibble containing the model results in calibration mode}
 
-\item{results_test}{A tibble containing the model results in evaluation mode.}
+\item{results_test}{A tibble containing the model results in evaluation mode}
 
 \item{events}{A tibble containing information about the flow events: start, end dates, and event IDs}
 
 \item{Qthr}{Streamflow threshold to evaluate contingency table}
 
-\item{Hprev}{Forecast horizon ("H3", "H6", "H12", "H24").}
+\item{Hprev}{Forecast horizon ("H3", "H6", "H12" or "H24")}
 }
 \value{
 A tibble containing the calculated performance metrics for the specified period, including:
 \itemize{
-\item \verb{NSE_KGE bounded}: NSE and KGE metrics for overall performance and flood events.
-\item \code{C2MP}: C2MP metrics for overall performance and flood events.
-\item \code{cont_table}: Contingency table metrics - POD, FAR, CSI, for each model variable, Qprev, Qcorr, Qtan
+\item \verb{NSE_KGE bounded}: NSE and KGE metrics for overall performance and flood events
+\item \code{C2MP}: C2MP metrics for overall performance and flood events
+\item \code{cont_table}: Contingency table metrics (POD, FAR, CSI) for each model variable (Qprev, Qcorr, Qtan)
 }
 }
 \description{
