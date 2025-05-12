@@ -2,15 +2,16 @@
 #' 
 #' @param path_prev Path to the GR5H_RI forecast data (RDS file).
 #' @param time_steps Time window, in hours, used to compute past streamflow prediction errors for the post-processing model.
-#' @param Hprev Forecast horizon ("H3", "H6", "H12", "H24").
+#' @param Hprev Forecast horizon ("H3", "H6", "H12" or "H24").
 #' @param Qobs_ts Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl).
+#' @param cal_method Calibration method ("WsRf, "Ref" or "OL")
 #'
 #' @return A tibble containing pre-processed data for use in the post-processing model, including time series 
 #' of observed and forecasted streamflow.
 #' @export
 
 prepare_input_data <- function(
-  path_prev, time_steps, Hprev, Qobs_ts
+  path_prev, time_steps, Hprev, Qobs_ts, cal_method
 ) {
   
   #! Number of lags calculated from the error at time t predicted at time t-1 (Err_t_t-1)
@@ -30,7 +31,7 @@ prepare_input_data <- function(
   
   #! Join observation data (Qobs and Pmm) with GR5H_RI model predictions
   prev <- prev |> 
-    dplyr::select(Date, H1, tidyr::all_of(Hprev)) |> 
+    dplyr::select(Date, H1, OL, tidyr::all_of(Hprev)) |> 
     dplyr::left_join(Qobs_ts, dplyr::join_by(Date))
   
   #! Exclude data from October, November, and December 2021 (issues with Comephore data)
@@ -52,25 +53,47 @@ prepare_input_data <- function(
   )
   
   #! Prepare model input data 
-  prev <- prev |>
-    dplyr::mutate(
-      #! Observed flow at time t+H: Qobs(t+H)
-      Qobs_tpH = Qobs_t[match(Date + Hprev_datetime, Date)],  
-      #! Observed flow at time t-1: Qobs(t-1)
-      Qobs_tm1 = Qobs_t[match(Date - lubridate::hours(1), Date)],  
-      #! Observed gradient flow between t and t-1
-      dQobs_t_tm1 = Qobs_t - Qobs_tm1,
-      #! Predicted flow at time t forecasted at time t-H: Qprev(t, t-H)
-      Qprev_t_tmH = prev[[Hprev]][match(Date - Hprev_datetime, Date)],
-      #! Predicted flow at time t+H forecasted at time t: Qprev(t+H, t)
-      Qprev_tpH_t = prev[[Hprev]],   
-      #! Error at time t+H predicted at time t: Err(t+H, t)
-      Err_tpH_t = Qprev_tpH_t - Qobs_tpH,     
-      #! Predicted flow at time t forecasted at time t-1: Qprev(t, t-1)
-      Qprev_t_tm1 = H1[match(Date - lubridate::hours(1), Date)],
-      #! Error at time t predicted at time t-1: Err(t, t-1)
-      Err_t_tm1 = Qprev_t_tm1 - Qobs_t   
-    )    
+  if (cal_method != "OL") {
+    prev <- prev |>
+      dplyr::mutate(
+        #! Observed flow at time t+H: Qobs(t+H)
+        Qobs_tpH = Qobs_t[match(Date + Hprev_datetime, Date)],  
+        #! Observed flow at time t-1: Qobs(t-1)
+        Qobs_tm1 = Qobs_t[match(Date - lubridate::hours(1), Date)],  
+        #! Observed gradient flow between t and t-1
+        dQobs_t_tm1 = Qobs_t - Qobs_tm1,
+        #! Predicted flow at time t forecasted at time t-H: Qprev(t, t-H)
+        Qprev_t_tmH = prev[[Hprev]][match(Date - Hprev_datetime, Date)],
+        #! Predicted flow at time t+H forecasted at time t: Qprev(t+H, t)
+        Qprev_tpH_t = prev[[Hprev]],   
+        #! Error at time t+H predicted at time t: Err(t+H, t)
+        Err_tpH_t = Qprev_tpH_t - Qobs_tpH,     
+        #! Predicted flow at time t forecasted at time t-1: Qprev(t, t-1)
+        Qprev_t_tm1 = H1[match(Date - lubridate::hours(1), Date)],
+        #! Error at time t predicted at time t-1: Err(t, t-1)
+        Err_t_tm1 = Qprev_t_tm1 - Qobs_t   
+      ) 
+  } else {
+    prev <- prev |> 
+      dplyr::mutate(
+        #! Observed flow at time t+H: Qobs(t+H)
+        Qobs_tpH = Qobs_t[match(Date + Hprev_datetime, Date)],  
+        #! Observed flow at time t-1: Qobs(t-1)
+        Qobs_tm1 = Qobs_t[match(Date - lubridate::hours(1), Date)],  
+        #! Observed gradient flow between t and t-1
+        dQobs_t_tm1 = Qobs_t - Qobs_tm1,
+        #! Predicted flow at time t forecasted at time t-H: Qprev(t, t-H)
+        Qprev_t_tmH = OL,
+        #! Predicted flow at time t+H forecasted at time t: Qprev(t+H, t)
+        Qprev_tpH_t = OL[match(Date + Hprev_datetime, Date)],   
+        #! Error at time t+H predicted at time t: Err(t+H, t)
+        Err_tpH_t = Qprev_tpH_t - Qobs_tpH,   
+        #! Predicted flow at time t forecasted at time t-1: Qprev(t, t-1)
+        Qprev_t_tm1 = OL,
+        #! Error at time t predicted at time t-1: Err(t, t-1)
+        Err_t_tm1 = Qprev_t_tm1 - Qobs_t  
+      )
+  }     
 
   #! Apply Tangara correction method
   #! The correction factor should be within the range of 0.2 to 5 to prevent excessive corrections
