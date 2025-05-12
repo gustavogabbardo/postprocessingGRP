@@ -1,9 +1,9 @@
 #' Prepare Input Data for Post-Processing Model
 #' 
-#' @param path_prev Path to the GR5H_RI forecast data (RDS file).
-#' @param time_steps Time window, in hours, used to compute past streamflow prediction errors for the post-processing model.
-#' @param Hprev Forecast horizon ("H3", "H6", "H12" or "H24").
-#' @param Qobs_ts Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl).
+#' @param path_prev Path to the GR5H_RI forecast data (RDS file)
+#' @param time_steps Time window (in hours) used to compute past streamflow prediction errors for the post-processing model
+#' @param Hprev Forecast horizon ("H3", "H6", "H12" or "H24")
+#' @param Qobs_ts Observed streamflow time series tibble with columns "Date" (dttm) and "Qobs" (dbl)
 #' @param cal_method Calibration method ("WsRf, "Ref" or "OL")
 #'
 #' @return A tibble containing pre-processed data for use in the post-processing model, including time series 

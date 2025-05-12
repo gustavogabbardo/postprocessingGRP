@@ -1,14 +1,14 @@
 #' Evaluate model performance (NSE, KGE, C2MP, POD, FAR, CSI)
 #'
-#' @param results_cal A tibble containing the model results in calibration mode.
-#' @param results_test A tibble containing the model results in evaluation mode.
+#' @param results_cal A tibble containing the model results in calibration mode
+#' @param results_test A tibble containing the model results in evaluation mode
 #' @param events A tibble containing information about the flow events: start, end dates, and event IDs
 #' @param Qthr Streamflow threshold to evaluate contingency table
-#' @param Hprev Forecast horizon ("H3", "H6", "H12", "H24").
+#' @param Hprev Forecast horizon ("H3", "H6", "H12" or "H24")
 #' @return A tibble containing the calculated performance metrics for the specified period, including:
-#'   - `NSE_KGE bounded`: NSE and KGE metrics for overall performance and flood events.
-#'   - `C2MP`: C2MP metrics for overall performance and flood events.
-#'   - `cont_table`: Contingency table metrics - POD, FAR, CSI, for each model variable, Qprev, Qcorr, Qtan
+#'   - `NSE_KGE bounded`: NSE and KGE metrics for overall performance and flood events
+#'   - `C2MP`: C2MP metrics for overall performance and flood events
+#'   - `cont_table`: Contingency table metrics (POD, FAR, CSI) for each model variable (Qprev, Qcorr, Qtan)
 #' @export
 
 evaluate_results <- function(

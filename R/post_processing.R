@@ -1,14 +1,14 @@
 #' Post-processing Model Application (MLP, Random Forest, or XGBoost)
 #'
-#' @param input_data_cal A tibble containing the pre-processed GR5H_RI forecast data for the calibration period.
-#' @param input_data_eval A tibble containing the pre-processed GR5H_RI forecast data for the evaluation period.
-#' @param model_name A string indicating the type of post-processing model to apply ("mlp", "random_forest" or "xgboost").
-#' @param Hprev Forecast horizon ("H3", "H6", "H12", "H24").
+#' @param input_data_cal A tibble containing the pre-processed GR5H_RI forecast data for the calibration period
+#' @param input_data_eval A tibble containing the pre-processed GR5H_RI forecast data for the evaluation period
+#' @param model_name A string indicating the type of post-processing model to apply ("mlp", "random_forest" or "xgboost")
+#' @param Hprev Forecast horizon ("H3", "H6", "H12" or "H24")
 #' 
 #' @return A list containing:
-#'   - `cal`: The model's predictions for the calibration period.
-#'   - `test`: The model's predictions for the evaluation period.
-#'   - `model`: Fitted model and calibrated hyperparameters.
+#'   - `cal`: The model's predictions for the calibration period
+#'   - `test`: The model's predictions for the evaluation period
+#'   - `model`: Fitted model and calibrated hyperparameters
 #'
 #' @export
 
