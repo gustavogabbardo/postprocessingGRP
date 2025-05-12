@@ -13,6 +13,4 @@ model.
 ## Installation
 
 You can install the development version of postprocessingGRP from
-[GitHub](https://github.com/) with:
-
-\``r # install.packages("pak") pak::pak("gustavogabbardo/postprocessingGRP")`
+[GitHub](https://github.com/)

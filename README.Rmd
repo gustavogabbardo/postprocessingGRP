@@ -22,9 +22,4 @@ The goal of postprocessingGRP is to provide tools for performing post-processing
 
 ## Installation
 
-You can install the development version of postprocessingGRP from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("pak")
-pak::pak("gustavogabbardo/postprocessingGRP")
-``
+You can install the development version of postprocessingGRP from [GitHub](https://github.com/)
