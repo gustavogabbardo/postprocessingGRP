@@ -338,7 +338,7 @@ evaluate_results <- function(
   C2MP_Qtan_test_overall <- persistance(Qtan_test, mask_overall)
 
   df_persistance <- tibble::tibble(
-    Mask = rep(c("Overall performance", "Flood Events"), times = 6),
+    Mask = rep(c("Overall performance", "Flood events"), times = 6),
     Variable = rep(c("Qprev", "Qcorr", "Qtan"), each = 4),
     Mode = rep(c("Calage", "Test"), each = 2, times = 3),
     Value = c(
