@@ -50,7 +50,7 @@ post_processing <- function(
 
   #! Machine learning model
   model_mlp <- parsnip::mlp(
-    hidden_units = c(64),
+    hidden_units = c(128),
     learn_rate = c(0.1),
     epochs = c(10)
   ) |> 
