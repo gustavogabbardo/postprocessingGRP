@@ -4,7 +4,7 @@
 \alias{evaluate_results}
 \title{Evaluate model performance (NSE, KGE, C2MP, POD, FAR, CSI)}
 \usage{
-evaluate_results(results_cal, results_test, events, Qthr, Hprev)
+evaluate_results(results_cal, results_test, events, Hprev, period)
 }
 \arguments{
 \item{results_cal}{A tibble containing the model results in calibration mode}
@@ -13,9 +13,9 @@ evaluate_results(results_cal, results_test, events, Qthr, Hprev)
 
 \item{events}{A tibble containing information about the flow events: start, end dates, and event IDs}
 
-\item{Qthr}{Streamflow threshold to evaluate contingency table}
-
 \item{Hprev}{Forecast horizon ("H3", "H6", "H12" or "H24")}
+
+\item{period}{Evaluation period ("P1", "P2", c("P1", "P2"))}
 }
 \value{
 A tibble containing the calculated performance metrics for the specified period, including:

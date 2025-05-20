@@ -3,8 +3,8 @@
 #' @param results_cal A tibble containing the model results in calibration mode
 #' @param results_test A tibble containing the model results in evaluation mode
 #' @param events A tibble containing information about the flow events: start, end dates, and event IDs
-#' @param Qthr Streamflow threshold to evaluate contingency table
 #' @param Hprev Forecast horizon ("H3", "H6", "H12" or "H24")
+#' @param period Evaluation period ("P1", "P2", c("P1", "P2"))
 #' @return A tibble containing the calculated performance metrics for the specified period, including:
 #'   - `NSE_KGE bounded`: NSE and KGE metrics for overall performance and flood events
 #'   - `C2MP`: C2MP metrics for overall performance and flood events
@@ -12,7 +12,7 @@
 #' @export
 
 evaluate_results <- function(
-  results_cal, results_test, events, Qthr, Hprev) {
+  results_cal, results_test, events, Hprev, period) {
   
   #! Forecast horizon in hours
   Hprev_hours <- as.integer(substr(Hprev, 2, nchar(Hprev)))
@@ -22,20 +22,22 @@ evaluate_results <- function(
 
   #! Persistance (Qobs_tmH)
   results_cal <- results_cal |> 
+    dplyr::filter(Period %in% period) |> 
     dplyr::mutate(
       Qobs_tmH = Qobs[match(Date - Hprev_datetime, Date)]
     ) |> 
     tidyr::drop_na()
 
   results_test <- results_test |> 
+    dplyr::filter(Period %in% period) |> 
     dplyr::mutate(
       Qobs_tmH = Qobs[match(Date - Hprev_datetime, Date)]
     ) |> 
     tidyr::drop_na()
-  
+
   Qobs <- results_cal |> dplyr::pull(Qobs)
   Dates <- results_cal |> dplyr::pull(Date)
-
+  
   Qprev_cal <- results_cal |> dplyr::pull(Qprev)
   Qprev_test <- results_test |> dplyr::pull(Qprev)
   Qcorr_cal <- results_cal |> dplyr::pull(Qcorr)
@@ -44,8 +46,23 @@ evaluate_results <- function(
   Qtan_test <- results_test |> dplyr::pull(Qtan)
 
   Qpers <- results_cal |> dplyr::pull(Qobs_tmH)
-  
+
+  #! Streamflow threshold to evaluate contingency table
+  Qthr <- stats::quantile(
+    Qobs_ts |> 
+      dplyr::pull(Qobs), 
+      probs = prob_thr,
+      na.rm = TRUE
+  )
+
   #! Temporal masks
+  start_period <- min(results_cal |> dplyr::pull(Date))
+  end_period <- max(results_cal |> dplyr::pull(Date))
+
+  #! Filter events for a specified sub-period
+  events <- events |> 
+    dplyr::filter(start >= start_period & end <= end_period)
+
   mask_events <- purrr::map_lgl(
     Dates, 
     \(x) any(x >= events$start & x <= events$end)
@@ -90,7 +107,7 @@ evaluate_results <- function(
 
     return(
       tibble::tibble(
-        Mask = c("Overall performance", "Flood events", paste0("Event ", 1:length(events$ID))),
+        Mask = c("Overall performance", "Flood events", paste0("Event ", events$ID)),
         NSE = NSE_Qvar_mode_values,
         KGE = KGE_Qvar_mode_values
       )
@@ -303,8 +320,7 @@ evaluate_results <- function(
     ) |> 
     dplyr::filter(mask)
 
-    #Eff <- 1 - (sum((data$Qobs - data$Qforecast)^2) / sum((data$Qobs - data$Qpers)^2))
-    Eff <- 1 - (sum((data$Qobs - data$Qforecast)^2) / sum((data$Qobs - mean(data$Qobs))^2))
+    Eff <- 1 - (sum((data$Qobs - data$Qforecast)^2) / sum((data$Qobs - data$Qpers)^2))
     C2MP <- Eff / (2 - Eff)
   }
 
