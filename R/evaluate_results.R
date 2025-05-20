@@ -175,38 +175,6 @@ evaluate_results <- function(
       Variable = "Qtan",
       Mode = "Test"
     )
-  
-  #! Persistance criteria
-  #! --------------------
-
-  persistance <- function(Qforecast, mask) {
-
-    data <- tibble::tibble(
-      Qobs = Qobs,
-      Qforecast = Qforecast,
-      Qpers = Qpers,
-      mask = mask
-    ) |> 
-    dplyr::filter(mask)
-
-    Eff <- 1 - (sum((data$Qobs - data$Qforecast)^2) / sum((data$Qobs - data$Qpers)^2))
-    C2MP <- Eff / (2 - Eff)
-  }
-
-  C2MP_Qprev_cal_events <- persistance(Qprev_cal, mask_events)
-  C2MP_Qprev_cal_overall <- persistance(Qprev_cal, mask_overall)
-  C2MP_Qprev_test_events <- persistance(Qprev_test, mask_events)
-  C2MP_Qprev_test_overall <- persistance(Qprev_test, mask_overall)
-
-  C2MP_Qcorr_cal_events <- persistance(Qcorr_cal, mask_events)
-  C2MP_Qcorr_cal_overall <- persistance(Qcorr_cal, mask_overall)
-  C2MP_Qcorr_test_events <- persistance(Qcorr_test, mask_events)
-  C2MP_Qcorr_test_overall <- persistance(Qcorr_test, mask_overall)
-
-  C2MP_Qtan_cal_events <- persistance(Qtan_cal, mask_events)
-  C2MP_Qtan_cal_overall <- persistance(Qtan_cal, mask_overall)
-  C2MP_Qtan_test_events <- persistance(Qtan_test, mask_events)
-  C2MP_Qtan_test_overall <- persistance(Qtan_test, mask_overall)
 
   #! Contingency table
   #! -----------------
@@ -322,6 +290,24 @@ evaluate_results <- function(
     KGE = KGE_bounded(KGE)
   )
 
+  #! Persistance criteria
+  #! --------------------
+
+  persistance <- function(Qforecast, mask) {
+
+    data <- tibble::tibble(
+      Qobs = Qobs,
+      Qforecast = Qforecast,
+      Qpers = Qpers,
+      mask = mask
+    ) |> 
+    dplyr::filter(mask)
+
+    #Eff <- 1 - (sum((data$Qobs - data$Qforecast)^2) / sum((data$Qobs - data$Qpers)^2))
+    Eff <- 1 - (sum((data$Qobs - data$Qforecast)^2) / sum((data$Qobs - mean(data$Qobs))^2))
+    C2MP <- Eff / (2 - Eff)
+  }
+
   C2MP_Qprev_cal_events <- persistance(Qprev_cal, mask_events)
   C2MP_Qprev_cal_overall <- persistance(Qprev_cal, mask_overall)
   C2MP_Qprev_test_events <- persistance(Qprev_test, mask_events)
@@ -346,7 +332,7 @@ evaluate_results <- function(
       C2MP_Qprev_test_overall, C2MP_Qprev_test_events,
 
       C2MP_Qcorr_cal_overall, C2MP_Qcorr_cal_events,
-      C2MP_Qcorr_test_overall, C2MP_Qtan_test_events,
+      C2MP_Qcorr_test_overall, C2MP_Qcorr_test_events,
 
       C2MP_Qtan_cal_overall, C2MP_Qtan_cal_events,
       C2MP_Qtan_test_overall, C2MP_Qtan_test_events
